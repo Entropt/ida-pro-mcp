@@ -133,7 +133,7 @@ class IdaMcpHttpRequestHandler(McpHttpRequestHandler):
             return
 
         if extension == "json":
-            content = json.dumps(data, indent=2)
+            content = json.dumps(data, indent=4)
         elif isinstance(data, dict) and "code" in data:
             content = str(data["code"])
         elif isinstance(data, list) and data and isinstance(data[0], dict):
@@ -142,7 +142,7 @@ class IdaMcpHttpRequestHandler(McpHttpRequestHandler):
                 for item in data
             )
         else:
-            content = json.dumps(data, indent=2)
+            content = json.dumps(data, indent=4)
 
         body = content.encode("utf-8")
         self.send_response(200)

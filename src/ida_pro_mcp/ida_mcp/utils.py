@@ -1105,7 +1105,7 @@ def handle_large_output(result: Any, line_threshold: int = 3000) -> Any:
         Either the original result or a dict with file path if written to file
     """
     try:
-        serialized = json.dumps(result, indent=2)
+        serialized = json.dumps(result, indent=4)
         line_count = serialized.count("\n") + 1
 
         if line_count > line_threshold:

@@ -197,7 +197,7 @@ def main():
     idapro.close_database(False)
 
     # Output as formatted JSON
-    print(json.dumps(info, indent=2))
+    print(json.dumps(info, indent=4))
 
 
 if __name__ == "__main__":

@@ -194,13 +194,13 @@ def print_mcp_config():
     print("[HTTP MCP CONFIGURATION]")
     print(
         json.dumps(
-            {"mcpServers": {mcp.name: generate_mcp_config(stdio=False)}}, indent=2
+            {"mcpServers": {mcp.name: generate_mcp_config(stdio=False)}}, indent=4
         )
     )
     print("\n[STDIO MCP CONFIGURATION]")
     print(
         json.dumps(
-            {"mcpServers": {mcp.name: generate_mcp_config(stdio=True)}}, indent=2
+            {"mcpServers": {mcp.name: generate_mcp_config(stdio=True)}}, indent=4
         )
     )
     print("\n[OPENCODE HTTP MCP CONFIGURATION]")
@@ -210,7 +210,7 @@ def print_mcp_config():
                 "$schema": "https://opencode.ai/config.json",
                 "mcp": {mcp.name: generate_opencode_config(stdio=False)},
             },
-            indent=2,
+            indent=4,
         )
     )
     print("\n[OPENCODE STDIO MCP CONFIGURATION]")
@@ -220,7 +220,7 @@ def print_mcp_config():
                 "$schema": "https://opencode.ai/config.json",
                 "mcp": {mcp.name: generate_opencode_config(stdio=True)},
             },
-            indent=2,
+            indent=4,
         )
     )
 
@@ -752,7 +752,8 @@ def install_mcp_servers(*, stdio: bool = False, uninstall=False, quiet=False):
             del mcp_servers[old_name]
 
         if name == "Opencode" and not uninstall:
-            config["$schema"] = "https://opencode.ai/config.json"
+            if "$schema" not in config:
+                config["$schema"] = "https://opencode.ai/config.json"
 
         if uninstall:
             if mcp.name not in mcp_servers:
@@ -768,6 +769,16 @@ def install_mcp_servers(*, stdio: bool = False, uninstall=False, quiet=False):
             else:
                 mcp_servers[mcp.name] = generate_mcp_config(stdio=stdio)
 
+        if name == "Opencode" and not uninstall:
+            # Ensure $schema comes before other keys in output JSON
+            schema_value = config.get("$schema", "https://opencode.ai/config.json")
+            reordered = {"$schema": schema_value}
+            for key, value in config.items():
+                if key == "$schema":
+                    continue
+                reordered[key] = value
+            config = reordered
+
         # Atomic write: temp file + rename
         suffix = ".toml" if is_toml else ".json"
         fd, temp_path = tempfile.mkstemp(
@@ -780,7 +791,7 @@ def install_mcp_servers(*, stdio: bool = False, uninstall=False, quiet=False):
                 if is_toml:
                     f.write(tomli_w.dumps(config).encode("utf-8"))
                 else:
-                    json.dump(config, f, indent=2)
+                    json.dump(config, f, indent=4)
             os.replace(temp_path, config_path)
         except:
             os.unlink(temp_path)
