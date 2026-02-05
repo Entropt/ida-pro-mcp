@@ -165,6 +165,31 @@ def generate_mcp_config(*, stdio: bool):
         return {"type": "http", "url": f"http://{IDA_HOST}:{IDA_PORT}/mcp"}
 
 
+def generate_opencode_config(*, stdio: bool):
+    if stdio:
+        mcp_config = {
+            "type": "local",
+            "enabled": True,
+            "command": [
+                get_python_executable(),
+                __file__,
+                "--ida-rpc",
+                f"http://{IDA_HOST}:{IDA_PORT}",
+            ],
+        }
+        env = {}
+        if copy_python_env(env):
+            print("[WARNING] Custom Python environment variables detected")
+            mcp_config["env"] = env
+        return mcp_config
+    else:
+        return {
+            "enabled": True,
+            "type": "http",
+            "url": f"http://{IDA_HOST}:{IDA_PORT}/mcp",
+        }
+
+
 def print_mcp_config():
     print("[HTTP MCP CONFIGURATION]")
     print(
@@ -178,6 +203,26 @@ def print_mcp_config():
             {"mcpServers": {mcp.name: generate_mcp_config(stdio=True)}}, indent=2
         )
     )
+    print("\n[OPENCODE HTTP MCP CONFIGURATION]")
+    print(
+        json.dumps(
+            {
+                "$schema": "https://opencode.ai/config.json",
+                "mcp": {mcp.name: generate_opencode_config(stdio=False)},
+            },
+            indent=2,
+        )
+    )
+    print("\n[OPENCODE STDIO MCP CONFIGURATION]")
+    print(
+        json.dumps(
+            {
+                "$schema": "https://opencode.ai/config.json",
+                "mcp": {mcp.name: generate_opencode_config(stdio=True)},
+            },
+            indent=2,
+        )
+    )
 
 
 def install_mcp_servers(*, stdio: bool = False, uninstall=False, quiet=False):
@@ -188,6 +233,7 @@ def install_mcp_servers(*, stdio: bool = False, uninstall=False, quiet=False):
         "VS Code": ("mcp", "servers"),
         "VS Code Insiders": ("mcp", "servers"),
         "Visual Studio 2022": (None, "servers"),  # servers at top level
+        "Opencode": ("mcp", None),
     }
 
     if sys.platform == "win32":
@@ -289,8 +335,10 @@ def install_mcp_servers(*, stdio: bool = False, uninstall=False, quiet=False):
                 "mcp_config.json",
             ),
             "Opencode": (
-                os.path.join(os.path.expanduser("~"), ".opencode"),
-                "mcp_config.json",
+                os.path.join(
+                    os.path.expanduser("~"), ".config", "opencode"
+                ),
+                "opencode.json",
             ),
             "Kiro": (
                 os.path.join(os.path.expanduser("~"), ".kiro"),
@@ -448,8 +496,10 @@ def install_mcp_servers(*, stdio: bool = False, uninstall=False, quiet=False):
                 "mcp_config.json",
             ),
             "Opencode": (
-                os.path.join(os.path.expanduser("~"), ".opencode"),
-                "mcp_config.json",
+                os.path.join(
+                    os.path.expanduser("~"), ".config", "opencode"
+                ),
+                "opencode.json",
             ),
             "Kiro": (
                 os.path.join(os.path.expanduser("~"), ".kiro"),
@@ -581,8 +631,10 @@ def install_mcp_servers(*, stdio: bool = False, uninstall=False, quiet=False):
                 "mcp_config.json",
             ),
             "Opencode": (
-                os.path.join(os.path.expanduser("~"), ".opencode"),
-                "mcp_config.json",
+                os.path.join(
+                    os.path.expanduser("~"), ".config", "opencode"
+                ),
+                "opencode.json",
             ),
             "Kiro": (
                 os.path.join(os.path.expanduser("~"), ".kiro"),
@@ -677,12 +729,16 @@ def install_mcp_servers(*, stdio: bool = False, uninstall=False, quiet=False):
                         config[nested_key] = {}
                     mcp_servers = config[nested_key]
                 else:
-                    # nested structure (e.g., VS Code uses mcp.servers)
                     if top_key not in config:
                         config[top_key] = {}
-                    if nested_key not in config[top_key]:
-                        config[top_key][nested_key] = {}
-                    mcp_servers = config[top_key][nested_key]
+                    if nested_key is None:
+                        # mcp map at top key (e.g., OpenCode uses mcp)
+                        mcp_servers = config[top_key]
+                    else:
+                        # nested structure (e.g., VS Code uses mcp.servers)
+                        if nested_key not in config[top_key]:
+                            config[top_key][nested_key] = {}
+                        mcp_servers = config[top_key][nested_key]
             else:
                 # Default: mcpServers at top level
                 if "mcpServers" not in config:
@@ -695,6 +751,9 @@ def install_mcp_servers(*, stdio: bool = False, uninstall=False, quiet=False):
             mcp_servers[mcp.name] = mcp_servers[old_name]
             del mcp_servers[old_name]
 
+        if name == "Opencode" and not uninstall:
+            config["$schema"] = "https://opencode.ai/config.json"
+
         if uninstall:
             if mcp.name not in mcp_servers:
                 if not quiet:
@@ -704,7 +763,10 @@ def install_mcp_servers(*, stdio: bool = False, uninstall=False, quiet=False):
                 continue
             del mcp_servers[mcp.name]
         else:
-            mcp_servers[mcp.name] = generate_mcp_config(stdio=stdio)
+            if name == "Opencode":
+                mcp_servers[mcp.name] = generate_opencode_config(stdio=stdio)
+            else:
+                mcp_servers[mcp.name] = generate_mcp_config(stdio=stdio)
 
         # Atomic write: temp file + rename
         suffix = ".toml" if is_toml else ".json"
