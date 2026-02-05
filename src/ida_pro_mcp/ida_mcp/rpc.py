@@ -14,7 +14,7 @@ MCP_SERVER = McpServer("ida-pro-mcp", extensions=MCP_EXTENSIONS)
 OUTPUT_LIMIT_MAX_CHARS = 50000
 OUTPUT_CACHE_MAX_SIZE = 100
 _output_cache: dict[str, Any] = {}
-_download_base_url: str = os.environ.get("IDA_MCP_URL", "http://127.0.0.1:13337")
+_download_base_url: str = os.environ.get("IDA_MCP_URL", "http://127.0.0.1:13336")
 
 
 def set_download_base_url(url: str) -> None:

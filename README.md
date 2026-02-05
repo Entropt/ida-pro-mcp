@@ -4,7 +4,7 @@ Simple [MCP Server](https://modelcontextprotocol.io/introduction) to allow vibe 
 
 https://github.com/user-attachments/assets/6ebeaa92-a9db-43fa-b756-eececce2aca0
 
-The binaries and prompt for the video are available in the [mcp-reversing-dataset](https://github.com/mrexodia/mcp-reversing-dataset) repository.
+The binaries and prompt for the video are available in the [mcp-reversing-dataset](https://github.com/Entropt/mcp-reversing-dataset) repository.
 
 ## Prerequisites
 
@@ -43,7 +43,7 @@ Install the latest version of the IDA Pro MCP package:
 
 ```sh
 pip uninstall ida-pro-mcp
-pip install https://github.com/mrexodia/ida-pro-mcp/archive/refs/heads/main.zip
+pip install https://github.com/Entropt/ida-pro-mcp/archive/refs/heads/main.zip
 ```
 
 Configure the MCP servers and install the IDA Plugin:
@@ -212,7 +212,7 @@ _Note_: The `idalib` feature was contributed by [Willi Ballenthin](https://githu
 Debugger tools are hidden by default. Enable with `?ext=dbg` query parameter:
 
 ```
-http://127.0.0.1:13337/mcp?ext=dbg
+http://127.0.0.1:13336/mcp?ext=dbg
 ```
 
 **Control:**
@@ -316,7 +316,7 @@ npx -y @modelcontextprotocol/inspector
 
 This will open a web interface at http://localhost:5173 and allow you to interact with the MCP tools for testing.
 
-For testing I create a symbolic link to the IDA plugin and then POST a JSON-RPC request directly to `http://localhost:13337/mcp`. After [enabling symbolic links](https://learn.microsoft.com/en-us/windows/apps/get-started/enable-your-device-for-development) you can run the following command:
+For testing I create a symbolic link to the IDA plugin and then POST a JSON-RPC request directly to `http://localhost:13336/mcp`. After [enabling symbolic links](https://learn.microsoft.com/en-us/windows/apps/get-started/enable-your-device-for-development) you can run the following command:
 
 ```sh
 uv run ida-pro-mcp --install

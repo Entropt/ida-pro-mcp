@@ -8,7 +8,7 @@ IDA Pro MCP Server - enables LLM-assisted reverse engineering by bridging IDA Pr
 
 **Architecture**: Dual-process design
 - **MCP Server** (`server.py`): Python >=3.11, runs via `uv`, proxies to the MCP server hosted by IDA
-- **IDA Plugin** (`ida_mcp/`): Runs inside IDA Pro, exposes MCP server over HTTP (port 13337+)
+- **IDA Plugin** (`ida_mcp/`): Runs inside IDA Pro, exposes MCP server over HTTP (port 13336+)
 
 ## Development Commands
 
@@ -21,7 +21,7 @@ uv run mcp dev src/ida_pro_mcp/server.py
 ### Installation
 ```bash
 # Install package + configure all MCP clients + install IDA plugin
-pip install https://github.com/mrexodia/ida-pro-mcp/archive/refs/heads/main.zip
+pip install https://github.com/Entropt/ida-pro-mcp/archive/refs/heads/main.zip
 ida-pro-mcp --install
 
 # Manual plugin install (creates symlinks or copies to IDA plugins folder)
@@ -194,7 +194,7 @@ filtered = pattern_filter(items, "name", pattern)  # Glob-style matching
 2. **Load binary in IDA**: Plugin appears under Edit → Plugins → MCP (Ctrl+Alt+M)
 3. **Start MCP server**: Click plugin menu item or hotkey
 4. **Test via MCP inspector**: `uv run mcp dev src/ida_pro_mcp/server.py`
-5. **Direct JSON-RPC testing**: POST to `http://localhost:13337/mcp`:
+5. **Direct JSON-RPC testing**: POST to `http://localhost:13336/mcp`:
    ```json
    {"jsonrpc": "2.0", "method": "my_function", "params": ["arg"], "id": 1}
    ```

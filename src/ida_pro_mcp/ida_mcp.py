@@ -32,7 +32,7 @@ class MCP(idaapi.plugin_t):
 
     # TODO: make these configurable
     HOST = "127.0.0.1"
-    PORT = 13337
+    PORT = 13336
 
     def init(self):
         hotkey = MCP.wanted_hotkey.replace("-", "+")
